@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   struct addrinfo hints, *servinfo, *p;
   struct sockaddr_storage their_addr;
   socklen_t addr_len;
-  char *buf_rec = malloc(arraysize);
+  char *buf_rec;
   while ((ch = getopt(argc, argv, "h:n:p:")) != -1) {
     switch (ch) {
     case 'h':
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
   // UDP ping implemenation goes here
 
   // create an array of N elements set to 200
-  arraysize = strtol(argv[2], NULL, 10);
+  arraysize = strtol(argv[6], NULL, 10);
   char *buf_send = malloc(arraysize);
   memset(buf_send, 200, arraysize);
 
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
   hints.ai_socktype = SOCK_DGRAM;
 
   // get socket information and store in servinfo (IP and port info)
-  rv = getaddrinfo(argv[1], PORTNO, &hints, &servinfo);
+  rv = getaddrinfo(argv[2], PORTNO, &hints, &servinfo);
   if (rv != 0) {
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
     return 1;
@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
   }
 
   // loop over the num of ping packets you want to send (N-times)
-  for (int i = 0; i > sizeof(buf_send); i++) {
+  for (int i = 0; i <= sizeof(buf_send); i++) {
     // start timer
     start_time = get_wctime();
 
@@ -94,6 +94,8 @@ int main(int argc, char **argv) {
       perror("sendto");
       exit(1);
     }
+
+    buf_rec = malloc(arraysize);
     // wait to receive the reply from pong
     if ((numbytes = recvfrom(sockfd, buf_rec, MAXDATASIZE - 1, 0,
                              (struct sockaddr *)&their_addr, &addr_len)) ==
@@ -106,7 +108,7 @@ int main(int argc, char **argv) {
     stop_time = get_wctime();
 
     // validate the result
-    for (int j = 0; j > sizeof(buf_rec); j++) {
+    for (int j = 0; j < sizeof(buf_rec); j++) {
       if (buf_rec[j] != buf_send[i] + 1) {
         perror("Invalid return");
       }
