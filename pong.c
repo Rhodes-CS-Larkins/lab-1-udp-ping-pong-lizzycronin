@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
   hints.ai_flags = AI_PASSIVE;
 
   // use getaddrinfo to retrieve info about self
-  if ((rv = getaddrinfo(NULL, PORTNO, &hints, &servinfo)) != 0) {
+  if ((rv = getaddrinfo(NULL, pongport, &hints, &servinfo)) != 0) {
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
     return 1;
   }
@@ -94,8 +94,7 @@ int main(int argc, char **argv) {
 
   addr_len = sizeof their_addr;
 
-  int N = strtol(argv[2], NULL, 10);
-  for (int i = 0; i <= N; i++) {
+  for (int i = 0; i <= nping; i++) {
     // get the input from the client
     if ((numbytes_from = recvfrom(sockfd, buf_from, MAXBUFLEN - 1, 0,
                                   (struct sockaddr *)&their_addr, &addr_len)) ==
@@ -109,16 +108,22 @@ int main(int argc, char **argv) {
                      get_in_addr((struct sockaddr *)&their_addr), s, sizeof s));
     printf("listener: packet is %d bytes long\n", numbytes_from);
     buf_from[numbytes_from] = '\0';
-    printf("listener: packet contains \"%s\"\n", buf_send);
+    printf("listener: packet contains \"%s\"\n", buf_from);
 
-    for (int j = 0; j < sizeof(buf_from); j++) {
-      buf_send[j] = buf_from[j] + 1;
+    for (int j = 0; j < numbytes_from; j++) {
+      buf_send[j] = (unsigned char)buf_from[j] + 1;
     }
-    if ((bytes_sent = sendto(sockfd, buf_send, strlen(buf_send), 0, p->ai_addr,
-                             p->ai_addrlen)) == -1) {
+
+    if ((bytes_sent = sendto(sockfd, buf_send, numbytes_from, 0,
+                             (struct sockaddr *)&their_addr, addr_len)) == -1) {
       perror("sendto");
       exit(1);
     }
+    printf("listener: first 10 bytes:");
+    for (int k = 0; k < numbytes_from && k < 10; k++) {
+      printf(" %u", (unsigned char)buf_from[k]);
+    }
+    printf("\n");
   }
   close(sockfd);
   printf("nping: %d pongport: %s\n", nping, pongport);
