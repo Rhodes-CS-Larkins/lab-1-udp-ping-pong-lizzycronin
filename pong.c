@@ -83,6 +83,7 @@ int main(int argc, char **argv) {
     break;
   }
 
+  // if there is no socket found in the list from getaddrinfo, return error
   if (p == NULL) {
     fprintf(stderr, "listener: failed to bind socket\n");
     return 2;
@@ -90,11 +91,13 @@ int main(int argc, char **argv) {
 
   freeaddrinfo(servinfo);
 
-  printf("listener: waiting to recvfrom...\n");
+  // printf("listener: waiting to recvfrom...\n");
 
+  // length of address from getaddrinfo
   addr_len = sizeof their_addr;
 
-  for (int i = 0; i <= nping; i++) {
+  // loop through the number of packets the client requested
+  for (int i = 0; i < nping; i++) {
     // get the input from the client
     if ((numbytes_from = recvfrom(sockfd, buf_from, MAXBUFLEN - 1, 0,
                                   (struct sockaddr *)&their_addr, &addr_len)) ==
@@ -103,30 +106,31 @@ int main(int argc, char **argv) {
       exit(1);
     }
 
-    printf("listener: got packet from %s\n",
-           inet_ntop(their_addr.ss_family,
-                     get_in_addr((struct sockaddr *)&their_addr), s, sizeof s));
-    printf("listener: packet is %d bytes long\n", numbytes_from);
-    buf_from[numbytes_from] = '\0';
-    printf("listener: packet contains \"%s\"\n", buf_from);
+    // printf("listener: got packet from %s\n",
+    inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr),
+              s, sizeof s);
+    // printf("listener: packet is %d bytes long\n", numbytes_from);
 
+    // printf("listener: first 10 bytes:");
+    // printf("\n");
+
+    // print the iteration and the client's info
+    printf("pong[%d] : received packet from %s\n", i, s);
+
+    // add one to all the values given by client
     for (int j = 0; j < numbytes_from; j++) {
       buf_send[j] = (unsigned char)buf_from[j] + 1;
     }
 
+    // send the updated array to the client
     if ((bytes_sent = sendto(sockfd, buf_send, numbytes_from, 0,
                              (struct sockaddr *)&their_addr, addr_len)) == -1) {
       perror("sendto");
       exit(1);
     }
-    printf("listener: first 10 bytes:");
-    for (int k = 0; k < numbytes_from && k < 10; k++) {
-      printf(" %u", (unsigned char)buf_from[k]);
-    }
-    printf("\n");
   }
   close(sockfd);
-  printf("nping: %d pongport: %s\n", nping, pongport);
+  // printf("nping: %d pongport: %s\n", nping, pongport);
 
   return 0;
 }
