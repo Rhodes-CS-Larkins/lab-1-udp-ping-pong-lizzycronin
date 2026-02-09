@@ -1,6 +1,6 @@
 /*
  * pong.c - UDP ping/pong server code
- *          author: <your name>
+ *          author: Lizzy Cronin
  */
 #include <arpa/inet.h>
 #include <netdb.h>
