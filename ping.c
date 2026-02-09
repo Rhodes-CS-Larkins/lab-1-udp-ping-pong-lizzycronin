@@ -130,9 +130,11 @@ int main(int argc, char **argv) {
     // printf("Total time: %.3f ms\n", total_time);
     printf("ping[%d] : round-trip time: %f ms\n", i, total_time);
   }
+  //print there were no errors if the validation passed
   if (error_mark != 1) {
     printf("no errors detected\n");
   }
+  //compute average time of all pings by n times
   avg_time = total_time / nping;
   printf("time to send %d packets of %d bytes %.3f (%.3f avg per packet)\n",
          nping, numbytes, total_time, avg_time);
