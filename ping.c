@@ -1,6 +1,6 @@
 /*
  * ping.c - UDP ping/pong client code
- *          author: <your name>
+ *          author: Lizzy Cronin
  */
 #include <arpa/inet.h>
 #include <errno.h>
